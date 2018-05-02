@@ -48,6 +48,11 @@ public class MessageBubbleView extends View {
 
 
 
+
+    private int getdistance(PointF dragPiont,PointF fixationPoint ){
+
+        return 0;
+    }
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
