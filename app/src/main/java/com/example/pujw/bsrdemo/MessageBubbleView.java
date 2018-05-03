@@ -13,18 +13,17 @@ import android.view.View;
 
 public class MessageBubbleView extends View {
 
-    private PointF mFixationPoint;
+    private PointF mFixationPoint;//拖拽圆
 
-    private PointF mDragPiont;
+    private PointF mDragPiont;//固定圆
 
-    private int mDragRadius = 10;
+    private int mDragRadius = 10;//拖拽圆的半径
 
     private Paint mPint;//画笔
 
-
     private int mFixactionRadius;
-    private int getmFixactionRadiusMax=7;
-
+    private int getmFixactionRadiusMin = 3;//最小可绘制圆的大小
+    private int mFixactionRadiusMax = 20;
 
 
     public MessageBubbleView(Context context) {
@@ -39,7 +38,8 @@ public class MessageBubbleView extends View {
         super(context, attrs, defStyleAttr);
 
         mDragRadius = dip2px(mDragRadius);
-        mFixactionRadius = dip2px(getmFixactionRadiusMax);
+        mFixactionRadius = dip2px(mFixactionRadiusMax);
+        getmFixactionRadiusMin = dip2px(getmFixactionRadiusMin);
         mPint = new Paint();
         mPint.setColor(Color.RED);
         mPint.setAntiAlias(true);
@@ -47,12 +47,6 @@ public class MessageBubbleView extends View {
     }
 
 
-
-
-    private int getdistance(PointF dragPiont,PointF fixationPoint ){
-
-        return 0;
-    }
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
@@ -79,13 +73,19 @@ public class MessageBubbleView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (mDragPiont==null || mFixationPoint==null){
+        if (mDragPiont == null || mFixationPoint == null) {
             return;
         }
 
         canvas.drawCircle(mDragPiont.x, mDragPiont.y, mDragRadius, mPint);
 
+        double distance = getdistance(mDragPiont, mFixationPoint);
 
+        mFixactionRadius = (int) (mFixactionRadiusMax - distance / 14);
+
+        if (mFixactionRadius > getmFixactionRadiusMin) {//如果距离小于最小值，不要求绘制
+            canvas.drawCircle(mFixationPoint.x, mFixationPoint.y, mFixactionRadius, mPint);
+        }
     }
 
     /**
@@ -112,9 +112,22 @@ public class MessageBubbleView extends View {
     }
 
 
-
     private int dip2px(int dip) {
 
         return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dip, getResources().getDisplayMetrics());
     }
+
+    /**
+     * 求两点之间的距离
+     *
+     * @param dragPiont
+     * @param fixationPoint
+     * @return
+     */
+    private double getdistance(PointF dragPiont, PointF fixationPoint) {
+
+        return Math.sqrt((fixationPoint.x - dragPiont.x) * (fixationPoint.x - dragPiont.x)
+                + (fixationPoint.y - dragPiont.y) * (fixationPoint.y - dragPiont.y));
+    }
+
 }
