@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.PointF;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
@@ -79,13 +80,13 @@ public class MessageBubbleView extends View {
 
         canvas.drawCircle(mDragPiont.x, mDragPiont.y, mDragRadius, mPint);
 
-        double distance = getdistance(mDragPiont, mFixationPoint);
+        Path bsrPath=getBSRpath();
 
-        mFixactionRadius = (int) (mFixactionRadiusMax - distance / 14);
-
-        if (mFixactionRadius > getmFixactionRadiusMin) {//如果距离小于最小值，不要求绘制
+        if (bsrPath!=null){
             canvas.drawCircle(mFixationPoint.x, mFixationPoint.y, mFixactionRadius, mPint);
+            canvas.drawPath(bsrPath,mPint);
         }
+
     }
 
     /**
@@ -112,6 +113,7 @@ public class MessageBubbleView extends View {
     }
 
 
+    //dip转px
     private int dip2px(int dip) {
 
         return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dip, getResources().getDisplayMetrics());
@@ -130,4 +132,51 @@ public class MessageBubbleView extends View {
                 + (fixationPoint.y - dragPiont.y) * (fixationPoint.y - dragPiont.y));
     }
 
+
+    /**
+     * 获得贝塞尔曲线的路径
+     * @return
+     */
+    public Path getBSRpath() {
+        double distance = getdistance(mDragPiont, mFixationPoint);
+
+        mFixactionRadius = (int) (mFixactionRadiusMax - distance / 14);
+        if (mFixactionRadius<getmFixactionRadiusMin){
+            return null;
+        }
+
+        Path path=new Path();
+        float tanA= ( mDragPiont.y-mFixationPoint.y)/(mDragPiont.x-mFixationPoint.x);
+        Double arcTanA=Math.atan(tanA);
+
+        //定圆一边的点
+        float p0x= (float) (mFixationPoint.x+mFixactionRadius*Math.sin(arcTanA));
+        float p0y= (float) (mFixationPoint.y-mFixactionRadius*Math.cos(arcTanA));
+
+        float p3x= (float) (mFixationPoint.x-mFixactionRadius*Math.sin(arcTanA));
+        float p3y= (float) (mFixationPoint.y+mFixactionRadius*Math.cos(arcTanA));
+
+        //动圆的一个点
+        float p1x= (float) (mDragPiont.x+mDragRadius*Math.sin(arcTanA));
+        float p1y= (float) (mDragPiont.y-mDragRadius*Math.cos(arcTanA));
+
+        float p2x= (float) (mDragPiont.x-mDragRadius*Math.sin(arcTanA));
+        float p2y= (float) (mDragPiont.y+mDragRadius*Math.cos(arcTanA));
+
+
+        PointF controlPoint=getControlPoint();
+        path.moveTo(p0x,p0y);
+        path.quadTo(controlPoint.x,controlPoint.y,p1x,p1y);
+
+        path.lineTo(p2x,p2y);
+        path.quadTo(controlPoint.x,controlPoint.y,p3x,p3y);
+        path.close();
+        return path;
+    }
+
+    public PointF getControlPoint() {
+        float c1= (float) ((mDragPiont.x+mFixationPoint.x)*0.5);
+        float c2= (float) ((mDragPiont.y+mFixationPoint.y)*0.5);
+        return new PointF( c1,c2);
+    }
 }
