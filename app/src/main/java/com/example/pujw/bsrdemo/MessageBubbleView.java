@@ -9,8 +9,9 @@ import android.graphics.PointF;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.TypedValue;
-import android.view.MotionEvent;
 import android.view.View;
+
+import org.jetbrains.annotations.NotNull;
 
 public class MessageBubbleView extends View {
 
@@ -47,31 +48,6 @@ public class MessageBubbleView extends View {
         mPint.setDither(true);
     }
 
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-
-        switch (event.getAction()) {
-
-            case MotionEvent.ACTION_DOWN:
-                float downX = event.getX();
-                float downY = event.getY();
-                initPoint(downX, downY);
-                break;
-            case MotionEvent.ACTION_MOVE:
-                float moveX = event.getX();
-                float moveY = event.getY();
-                updateDragPoint(moveX, moveY);
-                break;
-            case MotionEvent.ACTION_UP:
-                break;
-
-        }
-        invalidate();
-        return true;
-    }
-
-
     @Override
     protected void onDraw(Canvas canvas) {
         if (mDragPiont == null || mFixationPoint == null) {
@@ -80,11 +56,11 @@ public class MessageBubbleView extends View {
 
         canvas.drawCircle(mDragPiont.x, mDragPiont.y, mDragRadius, mPint);
 
-        Path bsrPath=getBSRpath();
+        Path bsrPath = getBSRpath();
 
-        if (bsrPath!=null){
+        if (bsrPath != null) {
             canvas.drawCircle(mFixationPoint.x, mFixationPoint.y, mFixactionRadius, mPint);
-            canvas.drawPath(bsrPath,mPint);
+            canvas.drawPath(bsrPath, mPint);
         }
 
     }
@@ -95,20 +71,18 @@ public class MessageBubbleView extends View {
      * @param moveX
      * @param moveY
      */
-    private void updateDragPoint(float moveX, float moveY) {
+    public void updateDragPoint(float moveX, float moveY) {
 
         mDragPiont.x = moveX;
         mDragPiont.y = moveY;
-
-
+        invalidate();
     }
 
     /**
      * 初始化两个圆
      */
-    private void initPoint(float x, float y) {
+    public void initPoint(float x, float y) {
         mFixationPoint = new PointF(x, y);
-
         mDragPiont = new PointF(x, y);
     }
 
@@ -133,7 +107,7 @@ public class MessageBubbleView extends View {
     }
 
 
-    /**
+    /*
      * 获得贝塞尔曲线的路径
      * @return
      */
@@ -141,42 +115,57 @@ public class MessageBubbleView extends View {
         double distance = getdistance(mDragPiont, mFixationPoint);
 
         mFixactionRadius = (int) (mFixactionRadiusMax - distance / 14);
-        if (mFixactionRadius<getmFixactionRadiusMin){
+        if (mFixactionRadius < getmFixactionRadiusMin) {
             return null;
         }
 
-        Path path=new Path();
-        float tanA= ( mDragPiont.y-mFixationPoint.y)/(mDragPiont.x-mFixationPoint.x);
-        Double arcTanA=Math.atan(tanA);
+        Path path = new Path();
+        float tanA = (mDragPiont.y - mFixationPoint.y) / (mDragPiont.x - mFixationPoint.x);
+        Double arcTanA = Math.atan(tanA);
 
         //定圆一边的点
-        float p0x= (float) (mFixationPoint.x+mFixactionRadius*Math.sin(arcTanA));
-        float p0y= (float) (mFixationPoint.y-mFixactionRadius*Math.cos(arcTanA));
+        float p0x = (float) (mFixationPoint.x + mFixactionRadius * Math.sin(arcTanA));
+        float p0y = (float) (mFixationPoint.y - mFixactionRadius * Math.cos(arcTanA));
 
-        float p3x= (float) (mFixationPoint.x-mFixactionRadius*Math.sin(arcTanA));
-        float p3y= (float) (mFixationPoint.y+mFixactionRadius*Math.cos(arcTanA));
+        float p3x = (float) (mFixationPoint.x - mFixactionRadius * Math.sin(arcTanA));
+        float p3y = (float) (mFixationPoint.y + mFixactionRadius * Math.cos(arcTanA));
 
         //动圆的一个点
-        float p1x= (float) (mDragPiont.x+mDragRadius*Math.sin(arcTanA));
-        float p1y= (float) (mDragPiont.y-mDragRadius*Math.cos(arcTanA));
+        float p1x = (float) (mDragPiont.x + mDragRadius * Math.sin(arcTanA));
+        float p1y = (float) (mDragPiont.y - mDragRadius * Math.cos(arcTanA));
 
-        float p2x= (float) (mDragPiont.x-mDragRadius*Math.sin(arcTanA));
-        float p2y= (float) (mDragPiont.y+mDragRadius*Math.cos(arcTanA));
+        float p2x = (float) (mDragPiont.x - mDragRadius * Math.sin(arcTanA));
+        float p2y = (float) (mDragPiont.y + mDragRadius * Math.cos(arcTanA));
 
 
-        PointF controlPoint=getControlPoint();
-        path.moveTo(p0x,p0y);
-        path.quadTo(controlPoint.x,controlPoint.y,p1x,p1y);
+        PointF controlPoint = getControlPoint();
+        path.moveTo(p0x, p0y);
+        path.quadTo(controlPoint.x, controlPoint.y, p1x, p1y);
 
-        path.lineTo(p2x,p2y);
-        path.quadTo(controlPoint.x,controlPoint.y,p3x,p3y);
+        path.lineTo(p2x, p2y);
+        path.quadTo(controlPoint.x, controlPoint.y, p3x, p3y);
         path.close();
         return path;
     }
 
     public PointF getControlPoint() {
-        float c1= (float) ((mDragPiont.x+mFixationPoint.x)*0.5);
-        float c2= (float) ((mDragPiont.y+mFixationPoint.y)*0.5);
-        return new PointF( c1,c2);
+        float c1 = (float) ((mDragPiont.x + mFixationPoint.x) * 0.5);
+        float c2 = (float) ((mDragPiont.y + mFixationPoint.y) * 0.5);
+        return new PointF(c1, c2);
+    }
+
+
+    public static void attch(@org.jetbrains.annotations.Nullable View view, @NotNull BubbleDisappearListener listener) {
+
+
+        if (view == null) {
+            throw new NullPointerException("View is null");
+        }
+        view.setOnTouchListener(new BubbleMessageTouchListener(view,view.getContext()));
+
+    }
+
+    public interface BubbleDisappearListener {
+        void dismiss(View view);
     }
 }
