@@ -1,11 +1,10 @@
 package com.example.pujw.bsrdemo
 
-import android.app.ActionBar
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.PixelFormat
 import android.view.MotionEvent
 import android.view.View
-import android.view.ViewGroup
 import android.view.WindowManager
 
 class BubbleMessageTouchListener(val view: View, val context: Context) : View.OnTouchListener {
@@ -29,12 +28,13 @@ class BubbleMessageTouchListener(val view: View, val context: Context) : View.On
                 view.visibility = View.INVISIBLE
                 mWindowManager!!.addView(mMessageBubbleView,mParams)
 
-                mMessageBubbleView!!.initPoint(event.x,event.y)
+                mMessageBubbleView!!.initPoint(event.rawX,event.rawY)
 
+                mMessageBubbleView!!.setDragBitmap(getBitmapByView(view))
             }
             MotionEvent.ACTION_MOVE -> {
 
-                mMessageBubbleView!!.updateDragPoint(event.x,event.y)
+                mMessageBubbleView!!.updateDragPoint(event.rawX,event.rawY)
 
             }
             MotionEvent.ACTION_UP -> {
@@ -44,5 +44,14 @@ class BubbleMessageTouchListener(val view: View, val context: Context) : View.On
         }
 
         return true
+    }
+
+
+    /**
+     * 从一个View中获取一个Bitmap
+     */
+    private fun getBitmapByView(view: View): Bitmap {
+        view.buildDrawingCache()
+        return view.drawingCache
     }
 }

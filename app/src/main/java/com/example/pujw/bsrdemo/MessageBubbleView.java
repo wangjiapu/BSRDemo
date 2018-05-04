@@ -1,6 +1,7 @@
 package com.example.pujw.bsrdemo;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -26,6 +27,8 @@ public class MessageBubbleView extends View {
     private int mFixactionRadius;
     private int getmFixactionRadiusMin = 3;//最小可绘制圆的大小
     private int mFixactionRadiusMax = 20;
+
+    private Bitmap mDragBitmap;
 
 
     public MessageBubbleView(Context context) {
@@ -61,6 +64,11 @@ public class MessageBubbleView extends View {
         if (bsrPath != null) {
             canvas.drawCircle(mFixationPoint.x, mFixationPoint.y, mFixactionRadius, mPint);
             canvas.drawPath(bsrPath, mPint);
+        }
+
+        if (mDragBitmap!=null){
+            canvas.drawBitmap(mDragBitmap,mDragPiont.x-mDragBitmap.getWidth()/2,
+                    mDragPiont.y-mDragBitmap.getHeight()/2,null);
         }
 
     }
@@ -163,6 +171,10 @@ public class MessageBubbleView extends View {
         }
         view.setOnTouchListener(new BubbleMessageTouchListener(view,view.getContext()));
 
+    }
+
+    public void setDragBitmap(@NotNull Bitmap bitmapByView) {
+        this.mDragBitmap=bitmapByView;
     }
 
     public interface BubbleDisappearListener {
