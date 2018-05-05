@@ -1,5 +1,6 @@
 package com.example.pujw.bsrdemo
 
+import android.app.Activity
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.PixelFormat
@@ -27,14 +28,14 @@ class BubbleMessageTouchListener(val view: View, val context: Context) : View.On
             MotionEvent.ACTION_DOWN -> {
                 view.visibility = View.INVISIBLE
                 mWindowManager!!.addView(mMessageBubbleView,mParams)
-
-                mMessageBubbleView!!.initPoint(event.rawX,event.rawY)
-
+                mMessageBubbleView!!.initPoint(event.rawX,
+                        event.rawY-BubbleStatusUtils.getStatusBarHeight(context))
                 mMessageBubbleView!!.setDragBitmap(getBitmapByView(view))
             }
             MotionEvent.ACTION_MOVE -> {
 
-                mMessageBubbleView!!.updateDragPoint(event.rawX,event.rawY)
+                mMessageBubbleView!!.updateDragPoint(event.rawX,
+                        event.rawY-BubbleStatusUtils.getStatusBarHeight(context))
 
             }
             MotionEvent.ACTION_UP -> {
