@@ -12,7 +12,7 @@ public class StatusBarUtils {
     public static void setStatusBarColor(Activity activity, int color) {
 
         //大于５．０以上的手机直接使用
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 
             activity.getWindow().setStatusBarColor(color);
 
@@ -47,7 +47,7 @@ public class StatusBarUtils {
      * @return
      */
 
-    public static int getStatusBarHeight(Activity activity) {
+    private static int getStatusBarHeight(Activity activity) {
         int result=0;
         Resources resources=activity.getResources();
         int resourceId=resources.getIdentifier("status_bar_height",
@@ -55,5 +55,15 @@ public class StatusBarUtils {
         if (resourceId>0)
             result=resources.getDimensionPixelSize(resourceId);
         return result;
+    }
+
+    public static void setActivityTranslucent(Activity activity){
+
+        if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP){
+
+
+        }else if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.KITKAT){
+            activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        }
     }
 }
