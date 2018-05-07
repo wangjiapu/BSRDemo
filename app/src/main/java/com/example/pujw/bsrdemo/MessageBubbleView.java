@@ -1,5 +1,9 @@
 package com.example.pujw.bsrdemo;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -11,10 +15,13 @@ import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
+import android.view.animation.OvershootInterpolator;
 
 import org.jetbrains.annotations.NotNull;
 
 public class MessageBubbleView extends View {
+
+    private static final int BSRDISTANCE=30;//拖拽的贝塞尔曲线距离
 
     private PointF mFixationPoint;//拖拽圆
 
@@ -98,7 +105,8 @@ public class MessageBubbleView extends View {
     //dip转px
     private int dip2px(int dip) {
 
-        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dip, getResources().getDisplayMetrics());
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dip,
+                getResources().getDisplayMetrics());
     }
 
     /**
@@ -122,7 +130,8 @@ public class MessageBubbleView extends View {
     public Path getBSRpath() {
         double distance = getdistance(mDragPiont, mFixationPoint);
 
-        mFixactionRadius = (int) (mFixactionRadiusMax - distance / 14);
+        mFixactionRadius = (int) (mFixactionRadiusMax - distance / BSRDISTANCE);
+
         if (mFixactionRadius < getmFixactionRadiusMin) {
             return null;
         }
@@ -156,6 +165,42 @@ public class MessageBubbleView extends View {
         return path;
     }
 
+    public void handleActionUp(){
+        if (mFixactionRadius > getmFixactionRadiusMin){//最小圆没有消失，那么就回弹
+            ValueAnimator animator= ObjectAnimator.ofFloat(1);
+            animator.setDuration(300);
+            final PointF start=new PointF(mDragPiont.x,mDragPiont.y);
+            final PointF end=new PointF(mFixationPoint.x,mFixationPoint.y);
+            animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation) {
+                    Float percent= (Float) animation.getAnimatedValue();
+                    PointF pointF=BubbleStatusUtils.getPointByPercent(start,end,percent);
+                    updateDragPoint(pointF.x,pointF.y);
+
+                }
+            });
+            animator.setInterpolator(new OvershootInterpolator(2.0f));//设置一个查值器
+
+            animator.start();
+
+            animator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    if (messageBubbleListener!=null){
+                        messageBubbleListener.restore();
+                    }
+                }
+            });
+
+        }else{//爆炸
+            if (messageBubbleListener!=null){
+                messageBubbleListener.dismiss();
+
+            }
+        }
+    }
+
     public PointF getControlPoint() {
         float c1 = (float) ((mDragPiont.x + mFixationPoint.x) * 0.5);
         float c2 = (float) ((mDragPiont.y + mFixationPoint.y) * 0.5);
@@ -163,7 +208,8 @@ public class MessageBubbleView extends View {
     }
 
 
-    public static void attch(@org.jetbrains.annotations.Nullable View view, @NotNull BubbleDisappearListener listener) {
+    public static void attch(@org.jetbrains.annotations.Nullable View view,
+                             @NotNull BubbleDisappearListener listener) {
 
 
         if (view == null) {
@@ -179,5 +225,17 @@ public class MessageBubbleView extends View {
 
     public interface BubbleDisappearListener {
         void dismiss(View view);
+    }
+
+
+    private MessageBubbleListener messageBubbleListener;
+
+    public void setMessageBubbleListener(MessageBubbleListener listener){
+        this.messageBubbleListener=listener;
+    }
+
+    public interface MessageBubbleListener{
+        void restore();//还原
+        void dismiss();//消失
     }
 }
