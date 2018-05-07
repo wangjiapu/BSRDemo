@@ -208,23 +208,23 @@ public class MessageBubbleView extends View {
     }
 
 
-    public static void attch(@org.jetbrains.annotations.Nullable View view,
-                             @NotNull BubbleDisappearListener listener) {
+    public static void attch(@org.jetbrains.annotations.Nullable View view) {
 
 
         if (view == null) {
             throw new NullPointerException("View is null");
         }
-        view.setOnTouchListener(new BubbleMessageTouchListener(view,view.getContext()));
+        view.setOnTouchListener(new BubbleMessageTouchListener(view, view.getContext(), new BubbleMessageTouchListener.BubbleDisappearListener() {
+            @Override
+            public void dismiss(@NotNull View view) {
+                //需求代码
+            }
+        }));
 
     }
 
     public void setDragBitmap(@NotNull Bitmap bitmapByView) {
         this.mDragBitmap=bitmapByView;
-    }
-
-    public interface BubbleDisappearListener {
-        void dismiss(View view);
     }
 
 

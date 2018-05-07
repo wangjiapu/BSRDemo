@@ -3,14 +3,16 @@ package com.example.pujw.bsrdemo
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.PixelFormat
+import android.graphics.drawable.AnimationDrawable
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.ImageView
+import android.widget.Toast
 
-class BubbleMessageTouchListener(val view: View, val context: Context) : View.OnTouchListener, MessageBubbleView.MessageBubbleListener {
+class BubbleMessageTouchListener(val view: View, val context: Context,val listener: BubbleDisappearListener) : View.OnTouchListener, MessageBubbleView.MessageBubbleListener {
 
 
     private var mWindowManager: WindowManager? = null
@@ -19,6 +21,8 @@ class BubbleMessageTouchListener(val view: View, val context: Context) : View.On
 
     private var mBombFrame: FrameLayout? = null
     private var mBombImage: ImageView? = null
+
+   // private var mListener:BubbleDisappearListener?=null
 
     init {
         mMessageBubbleView = MessageBubbleView(context)
@@ -64,6 +68,10 @@ class BubbleMessageTouchListener(val view: View, val context: Context) : View.On
         return true
     }
 
+    interface BubbleDisappearListener {
+        fun dismiss(view: View)
+    }
+
 
     /**
      * 从一个View中获取一个Bitmap
@@ -83,5 +91,31 @@ class BubbleMessageTouchListener(val view: View, val context: Context) : View.On
         mWindowManager!!.removeView(mMessageBubbleView)
         //消失的时候执行爆炸动画
         mWindowManager!!.addView(mBombFrame,mParams)
+        /**
+         * 如果需要消失动画
+         *
+         */
+       /* mBombImage!!.setBackgroundResource(R.drawable.anim)
+        val drawable= mBombImage!!.background as AnimationDrawable
+        drawable.start()
+        mBombImage!!.postDelayed(Runnable {
+            mWindowManager!!.removeView(mBombFrame)
+
+            listener.dismiss(mMessageBubbleView!!)
+
+        },getAnimationDrawableTime(drawable))*/
+        Toast.makeText(context,"气泡消失",Toast.LENGTH_SHORT).show()
     }
+
+    private fun getAnimationDrawableTime(drawable: AnimationDrawable): Long {
+        val number =drawable.numberOfFrames
+
+        var time=0
+        for (i in 0..number){
+            time+=drawable.getDuration(i)
+        }
+        return time.toLong()
+    }
+
+
 }
