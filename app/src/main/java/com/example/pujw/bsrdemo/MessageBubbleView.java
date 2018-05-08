@@ -16,6 +16,7 @@ import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.animation.OvershootInterpolator;
+import android.widget.Toast;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -214,10 +215,13 @@ public class MessageBubbleView extends View {
         if (view == null) {
             throw new NullPointerException("View is null");
         }
-        view.setOnTouchListener(new BubbleMessageTouchListener(view, view.getContext(), new BubbleMessageTouchListener.BubbleDisappearListener() {
+        view.setOnTouchListener(new BubbleMessageTouchListener(view, view.getContext(),
+                new BubbleMessageTouchListener.BubbleDisappearListener() {
             @Override
             public void dismiss(@NotNull View view) {
                 //需求代码
+                //这个是一个监听代码的的需求要书写的地方
+                Toast.makeText(view.getContext(),"监听事件",Toast.LENGTH_SHORT).show();
             }
         }));
 
