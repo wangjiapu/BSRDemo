@@ -166,41 +166,7 @@ public class MessageBubbleView extends View {
         return path;
     }
 
-    public void handleActionUp(){
-        if (mFixactionRadius > getmFixactionRadiusMin){//最小圆没有消失，那么就回弹
-            ValueAnimator animator= ObjectAnimator.ofFloat(1);
-            animator.setDuration(300);
-            final PointF start=new PointF(mDragPiont.x,mDragPiont.y);
-            final PointF end=new PointF(mFixationPoint.x,mFixationPoint.y);
-            animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                @Override
-                public void onAnimationUpdate(ValueAnimator animation) {
-                    Float percent= (Float) animation.getAnimatedValue();
-                    PointF pointF=BubbleStatusUtils.getPointByPercent(start,end,percent);
-                    updateDragPoint(pointF.x,pointF.y);
 
-                }
-            });
-            animator.setInterpolator(new OvershootInterpolator(2.0f));//设置一个查值器
-
-            animator.start();
-
-            animator.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    if (messageBubbleListener!=null){
-                        messageBubbleListener.restore();
-                    }
-                }
-            });
-
-        }else{//爆炸
-            if (messageBubbleListener!=null){
-                messageBubbleListener.dismiss();
-
-            }
-        }
-    }
 
     public PointF getControlPoint() {
         float c1 = (float) ((mDragPiont.x + mFixationPoint.x) * 0.5);
